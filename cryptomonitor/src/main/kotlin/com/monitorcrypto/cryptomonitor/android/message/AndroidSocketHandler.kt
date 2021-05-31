@@ -9,7 +9,7 @@ class AndroidSocketHandler(private val cryptoWebSocketClient: CryptoWebSocketCli
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val cryptoKey: String = message.payload
-        println("$cryptoKey received added listener")
+        println("$cryptoKey received from socket")
         if (cryptoKey.contains("closed")) {
             cryptoWebSocketClient?.remove(cryptoKey.split(" ")[0], session)
         } else {
