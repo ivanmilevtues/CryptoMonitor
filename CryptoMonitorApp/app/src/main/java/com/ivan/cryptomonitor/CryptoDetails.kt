@@ -23,15 +23,8 @@ class CryptoDetails : AppCompatActivity(), UpdatableActivity {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crypto_details)
         setCryptoIcon()
-        graphView = findViewById<GraphView>(R.id.realTimeGraph)
-        graphView.addSeries(series)
 
-        graphView.onDataChanged(false, false)
-        graphView.viewport.setMinY(.0);
-        graphView.viewport.setMaxY(100000.0)
-        graphView.viewport.isScrollable = true
-        graphView.viewport.setMinX(1622467980 * 1000.0);
-        graphView.viewport.setMaxX((1622468484 + 6000) * 1000.0);
+        initGraph()
 
         if(!isSocketRunning) {
             initConnection()
@@ -63,6 +56,13 @@ class CryptoDetails : AppCompatActivity(), UpdatableActivity {
         }
     }
 
+    override fun update(data: CryptoDto) {
+        val cryptoDetails = findViewById<TextView>(R.id.cryptoDescription)
+        series.appendData(DataPoint(data.transactionTime.time.toDouble(), data.price.toDouble()), false,22)
+        println("${data.transactionTime.time.toDouble()}, ${data.price.toDouble()}")
+        cryptoDetails.text = "Last transaction for ${data.cryptoName} was made in ${data.transactionTime} for ${data.price} ${data.fiatMoneyName} on the ${data.market} market."
+    }
+
     private fun setCryptoIcon() {
         val cryptoKey: String = (intent.extras?.get("cryptoKey")) as String
         val cryptoIconView = findViewById<ImageView>(R.id.cryptoIcon)
@@ -90,14 +90,19 @@ class CryptoDetails : AppCompatActivity(), UpdatableActivity {
         isSocketRunning = false;
     }
 
-    companion object {
-        private val subscriptionURL: URI = URI("ws://192.168.1.4:8080/websocket")
+    private fun initGraph() {
+        graphView = findViewById<GraphView>(R.id.realTimeGraph)
+        graphView.addSeries(series)
+
+        graphView.onDataChanged(false, false)
+        graphView.viewport.setMinY(.0);
+        graphView.viewport.setMaxY(100000.0)
+        graphView.viewport.isScrollable = true
+        graphView.viewport.setMinX(1622467980 * 1000.0);
+        graphView.viewport.setMaxX((1622468484 + 6000) * 1000.0);
     }
 
-    override fun update(data: CryptoDto) {
-        val cryptoDetails = findViewById<TextView>(R.id.cryptoDescription)
-        series.appendData(DataPoint(data.transactionTime.time.toDouble(), data.price.toDouble()), false,22)
-        println("${data.transactionTime.time.toDouble()}, ${data.price.toDouble()}")
-        cryptoDetails.text = "Last transaction for ${data.cryptoName} was made in ${data.transactionTime} for ${data.price} ${data.fiatMoneyName} on the ${data.market} market."
+    companion object {
+        private val subscriptionURL: URI = URI("ws://192.168.1.4:8080/websocket")
     }
 }
